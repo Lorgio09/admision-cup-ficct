@@ -14,6 +14,20 @@
                 </div>
             @endif
 
+            <div class="mb-6 flex justify-between items-center">
+                <form method="GET" action="{{ route('postulantes.index') }}" class="flex w-full max-w-lg">
+                    <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Buscar por Nombre o CI..." class="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-l-md shadow-sm">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-r-md shadow-sm transition">
+                        Buscar
+                    </button>
+                    @if(!empty($search))
+                        <a href="{{ route('postulantes.index') }}" class="ml-3 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md shadow-sm transition flex items-center justify-center">
+                            Limpiar
+                        </a>
+                    @endif
+                </form>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900 overflow-x-auto">
                     
@@ -42,11 +56,7 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($postulante->estado === 'pendiente_pago')
-                                        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                            Pendiente de Pago
-                                        </span>
-                                    @elseif($postulante->estado === 'pendiente')
+                                    @if($postulante->estado === 'pendiente')
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
                                             Pagado / En Revisión
                                         </span>
@@ -62,6 +72,16 @@
                                 </td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    
+                                    @if($postulante->estado === 'pendiente')
+                                        <form action="{{ route('postulantes.aprobar', $postulante->id) }}" method="POST" class="inline-block mr-3">
+                                            @csrf
+                                            <button type="submit" class="text-green-600 hover:text-green-900 font-bold" onclick="return confirm('¿Confirmas que los documentos son correctos y deseas inscribir oficialmente a este postulante?')">
+                                                Inscribir Alumno
+                                            </button>
+                                        </form>
+                                    @endif
+
                                     <a href="{{ route('postulantes.edit', $postulante->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
                                     
                                     <form action="{{ route('postulantes.destroy', $postulante->id) }}" method="POST" class="inline-block">
@@ -78,12 +98,16 @@
                             @if($postulantes->isEmpty())
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                    Aún no hay postulantes registrados en el sistema.
+                                    No se encontraron postulantes con esos datos.
                                 </td>
                             </tr>
                             @endif
                         </tbody>
                     </table>
+
+                    <div class="mt-4">
+                        {{ $postulantes->appends(['search' => $search])->links() }}
+                    </div>
 
                 </div>
             </div>

@@ -13,39 +13,60 @@ class PostulanteController extends Controller
     // ==================================================
 
     // 1. LISTAR POSTULANTES
-    public function index()
+    public function index(Request $request)
     {
-        // Traemos todos los postulantes con sus dos carreras relacionadas
-        $postulantes = Postulante::with(['primeraOpcion', 'segundaOpcion'])->get();
-        return view('postulantes.index', compact('postulantes'));
+        // 1. Capturamos lo que el usuario escribió en el buscador (si es que escribió algo)
+        $search = $request->input('search');
+
+        // 2. Hacemos la consulta a la base de datos
+        $postulantes = Postulante::when($search, function ($query, $search) {
+            // Nota: Como vi en tus capturas que usas PostgreSQL, usamos 'ilike' para que no importe si escriben en mayúsculas o minúsculas.
+            return $query->where('nombre', 'ilike', "%{$search}%")
+                         ->orWhere('ci', 'ilike', "%{$search}%");
+        })
+        ->orderBy('created_at', 'desc') // Ordenamos para que los más nuevos salgan primero
+        ->paginate(10); // Paginamos de 10 en 10 (¡Súper profesional!)
+
+        // 3. Mandamos los datos a la vista, incluyendo el término de búsqueda para mantenerlo en el input
+        return view('postulantes.index', compact('postulantes', 'search'));
     }
 
-    // 4. MOSTRAR FORMULARIO DE EDICIÓN
+    // MOSTRAR EL FORMULARIO DE EDICIÓN (ADMINISTRADOR)
     public function edit(Postulante $postulante)
     {
-        $carreras = Carrera::all();
+        // Traemos todas las carreras para llenar los selectores
+        $carreras = \App\Models\Carrera::all();
+        
         return view('postulantes.edit', compact('postulante', 'carreras'));
     }
 
     // 5. ACTUALIZAR LOS DATOS MODIFICADOS
     public function update(Request $request, Postulante $postulante)
     {
+        // Validamos los datos. 
+        // NOTA CLAVE: En 'ci' y 'correo' le decimos a Laravel que ignore el ID actual
+        // para que no lance error de "correo ya registrado" si el usuario no lo cambió.
         $request->validate([
-            'ci' => 'required|unique:postulantes,ci,' . $postulante->id,
+            'ci' => 'required|string|unique:postulantes,ci,' . $postulante->id,
             'nombre' => 'required|string|max:255',
             'correo' => 'required|email|unique:postulantes,correo,' . $postulante->id,
             'sexo' => 'required|in:M,F',
             'telefono' => 'required|string|max:20',
             'direccion' => 'required|string|max:255',
+            'ciudad_nacimiento' => 'required|string|max:100',
+            'fecha_nacimiento' => 'required|date',
+            'colegio_procedencia' => 'required|string|max:150',
+            'ciudad_residencia' => 'required|string|max:100',
             'carrera_primera_opcion_id' => 'required|exists:carreras,id',
             'carrera_segunda_opcion_id' => 'required|exists:carreras,id|different:carrera_primera_opcion_id',
-        ], [
-            'carrera_segunda_opcion_id.different' => 'La segunda opción debe ser diferente a la primera.'
+            'estado' => 'required|string'
         ]);
 
+        // Actualizamos los datos masivamente
         $postulante->update($request->all());
 
-        return redirect()->route('postulantes.index')->with('success', 'Datos del postulante actualizados.');
+        // Redirigimos a la lista con mensaje verde
+        return redirect()->route('postulantes.index')->with('success', '¡Datos del postulante actualizados correctamente!');
     }
 
     // 6. ELIMINAR REGISTRO
@@ -79,7 +100,11 @@ class PostulanteController extends Controller
             'direccion' => 'required|string|max:255',
             'carrera_primera_opcion_id' => 'required|exists:carreras,id',
             'carrera_segunda_opcion_id' => 'required|exists:carreras,id|different:carrera_primera_opcion_id',
-            'certificado_bachiller' => 'accepted'
+            'certificado_bachiller' => 'accepted',
+            'ciudad_nacimiento' => 'required|string|max:100',
+            'fecha_nacimiento' => 'required|date|before:today',
+            'colegio_procedencia' => 'required|string|max:150',
+            'ciudad_residencia' => 'required|string|max:100',
         ], [
             'ci.unique' => 'Este CI ya está registrado en el sistema.',
             'correo.unique' => 'Este correo ya está en uso.',
@@ -139,7 +164,11 @@ class PostulanteController extends Controller
                 'carrera_segunda_opcion_id' => $datos['carrera_segunda_opcion_id'],
                 'certificado_bachiller' => true,
                 'estado' => 'pendiente', // Ya pagó, directo a la lista de revisión del Admin
-                'recibo_pago' => $charge->id
+                'recibo_pago' => $charge->id,
+                'ciudad_nacimiento' => $datos['ciudad_nacimiento'],
+                'fecha_nacimiento' => $datos['fecha_nacimiento'],
+                'colegio_procedencia' => $datos['colegio_procedencia'],
+                'ciudad_residencia' => $datos['ciudad_residencia'],
             ]);
 
             // 3. Borramos los datos temporales y redirigimos con el mensaje personalizado
@@ -151,5 +180,16 @@ class PostulanteController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Error al procesar la tarjeta: ' . $e->getMessage()]);
         }
+    }
+
+    public function aprobar(Postulante $postulante)
+    {
+        // Cambiamos el estado de forma directa
+        $postulante->update([
+            'estado' => 'inscrito'
+        ]);
+
+        // Redirigimos de vuelta con un mensaje de éxito
+        return redirect()->route('postulantes.index')->with('success', '¡El postulante ' . $postulante->nombre . ' ha sido inscrito oficialmente en el sistema!');
     }
 }

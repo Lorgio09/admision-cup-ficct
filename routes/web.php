@@ -44,6 +44,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('carreras', CarreraController::class);
     Route::resource('materias', MateriaController::class);
     Route::resource('docentes', DocenteController::class);
+
+    Route::post('/postulantes/{postulante}/aprobar', [PostulanteController::class, 'aprobar'])->name('postulantes.aprobar');
 });
 
 require __DIR__.'/auth.php';

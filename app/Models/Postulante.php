@@ -19,7 +19,12 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'recibo_pago', 
     'certificado_bachiller', 
     'estado', 
-    'user_id'
+    'user_id',
+    // NUEVOS CAMPOS HABILITADOS:
+    'ciudad_nacimiento',
+    'fecha_nacimiento',
+    'colegio_procedencia',
+    'ciudad_residencia',
 ])]
 class Postulante extends Model
 {

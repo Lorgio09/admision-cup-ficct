@@ -55,6 +55,33 @@
                 <input id="direccion" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" type="text" name="direccion" value="{{ old('direccion') }}" required />
                 @error('direccion') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
             </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="ciudad_nacimiento" class="block font-medium text-sm text-gray-700">Ciudad de Nacimiento</label>
+                    <input id="ciudad_nacimiento" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="text" name="ciudad_nacimiento" value="{{ old('ciudad_nacimiento') }}" placeholder="Ej: Santa Cruz de la Sierra" required />
+                    @error('ciudad_nacimiento') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="fecha_nacimiento" class="block font-medium text-sm text-gray-700">Fecha de Nacimiento</label>
+                    <input id="fecha_nacimiento" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}" required />
+                    @error('fecha_nacimiento') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+                <div>
+                    <label for="colegio_procedencia" class="block font-medium text-sm text-gray-700">Colegio de Procedencia</label>
+                    <input id="colegio_procedencia" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="text" name="colegio_procedencia" value="{{ old('colegio_procedencia') }}" placeholder="Ej: Colegio Nacional Florida" required />
+                    @error('colegio_procedencia') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label for="ciudad_residencia" class="block font-medium text-sm text-gray-700">Ciudad de donde vive actualmente</label>
+                    <input id="ciudad_residencia" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="text" name="ciudad_residencia" value="{{ old('ciudad_residencia') }}" placeholder="Ej: Santa Cruz de la Sierra" required />
+                    @error('ciudad_residencia') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+            </div>
 
             <div class="border-b border-gray-200 pb-2 pt-4">
                 <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">2. Selección de Carreras</h3>
