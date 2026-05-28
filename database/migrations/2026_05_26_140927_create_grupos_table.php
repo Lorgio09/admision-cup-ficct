@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('grupos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre');
-            $table->integer('cupo');
+            $table->string('nombre'); // Ej: SA, SB
+            $table->string('turno');  // Ej: Mañana, Tarde, Noche
+        
+            // Añadimos esta relación con las Aulas
+            $table->foreignId('aula_id')->nullable()->constrained()->onDelete('set null');
+        
             $table->timestamps();
         });
     }

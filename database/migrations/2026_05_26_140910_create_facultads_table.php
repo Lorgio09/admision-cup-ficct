@@ -10,15 +10,13 @@ return new class extends Migration
      * Run the migrations.
      */
     public function up(): void
-    {    
-        Schema::create('docentes', function (Blueprint $table) {
+    {
+        Schema::create('facultads', function (Blueprint $table) {
             $table->id();
-            $table->string('ci')->unique();
+            $table->string('codigo')->unique();
             $table->string('nombre');
-            $table->string('telefono');
+            $table->string('direccion')->nullable();
             $table->timestamps();
-
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
         });
     }
 
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('docentes');
+        Schema::dropIfExists('facultads');
     }
 };
