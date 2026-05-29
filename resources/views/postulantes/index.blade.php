@@ -82,6 +82,10 @@
                                         </form>
                                     @endif
 
+                                    <a href="{{ route('postulantes.evaluar', $postulante->id) }}" class="text-orange-600 hover:text-orange-900 font-semibold mr-3">
+                                        Evaluar
+                                    </a>
+
                                     <a href="{{ route('postulantes.edit', $postulante->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
                                     
                                     <form action="{{ route('postulantes.destroy', $postulante->id) }}" method="POST" class="inline-block">

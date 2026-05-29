@@ -46,6 +46,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('docentes', DocenteController::class);
 
     Route::post('/postulantes/{postulante}/aprobar', [PostulanteController::class, 'aprobar'])->name('postulantes.aprobar');
+
+    // Módulo de Exámenes
+    Route::get('/postulantes/{postulante}/evaluar', [PostulanteController::class, 'evaluar'])->name('postulantes.evaluar');
+    Route::post('/postulantes/{postulante}/calificar', [PostulanteController::class, 'calificar'])->name('postulantes.calificar');
 });
 
 require __DIR__.'/auth.php';

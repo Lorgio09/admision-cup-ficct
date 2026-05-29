@@ -192,4 +192,74 @@ class PostulanteController extends Controller
         // Redirigimos de vuelta con un mensaje de éxito
         return redirect()->route('postulantes.index')->with('success', '¡El postulante ' . $postulante->nombre . ' ha sido inscrito oficialmente en el sistema!');
     }
+
+    // MOSTRAR PANTALLA PARA INGRESAR NOTAS
+    public function evaluar(Postulante $postulante)
+    {
+        // Traemos las materias disponibles (Computación, Matemáticas, Inglés, Física)
+        $materias = \App\Models\Materia::all();
+        return view('postulantes.evaluar', compact('postulante', 'materias'));
+    }
+
+    // ALGORITMO DE CALIFICACIÓN Y ASIGNACIÓN DE CUPOS
+    public function calificar(Request $request, Postulante $postulante)
+    {
+        // 1. Regla de Negocio: Validar exactamente 3 materias distintas y notas entre 0 y 100
+        $request->validate([
+            'materias' => 'required|array|size:3',
+            'materias.*' => 'required|exists:materias,id|distinct',
+            'notas' => 'required|array|size:3',
+            'notas.*' => 'required|numeric|min:0|max:100',
+        ], [
+            'materias.*.distinct' => 'No puedes seleccionar la misma materia dos veces.',
+            'notas.*.max' => 'La nota máxima permitida es 100.'
+        ]);
+
+        $suma = 0;
+
+        // 2. Guardar las 3 notas en la tabla 'evaluaciones'
+        for ($i = 0; $i < 3; $i++) {
+            \App\Models\Evaluacion::updateOrCreate(
+                ['postulante_id' => $postulante->id, 'materia_id' => $request->materias[$i]],
+                ['nota' => $request->notas[$i]]
+            );
+            $suma += $request->notas[$i];
+        }
+
+        // 3. Regla de Negocio: Calcular el promedio final
+        $promedio = round($suma / 3, 2);
+        $estado_final = 'REPROBADO';
+        $carrera_admitida = null;
+
+        // 4. Regla de Negocio: Estado y asignación de cupos
+        if ($promedio >= 60) {
+            $estado_final = 'APROBADO';
+            
+            $carrera1 = \App\Models\Carrera::find($postulante->carrera_primera_opcion_id);
+            $carrera2 = \App\Models\Carrera::find($postulante->carrera_segunda_opcion_id);
+
+            // Verificamos si hay cupo en su PRIMERA opción
+            if ($carrera1 && $carrera1->cupos > 0) {
+                $carrera1->decrement('cupos'); // Restamos 1 cupo a la carrera
+                $carrera_admitida = $carrera1->id;
+            } 
+            // Si la primera se llenó, verificamos la SEGUNDA opción
+            elseif ($carrera2 && $carrera2->cupos > 0) {
+                $carrera2->decrement('cupos'); // Restamos 1 cupo
+                $carrera_admitida = $carrera2->id;
+            } else {
+                // Aprobó, pero lamentablemente ambas carreras están llenas
+                $estado_final = 'APROBADO_SIN_CUPO';
+            }
+        }
+
+        // 5. Actualizamos el registro del postulante
+        $postulante->update([
+            'promedio' => $promedio,
+            'estado' => $estado_final,
+            'carrera_admitida_id' => $carrera_admitida
+        ]);
+
+        return redirect()->route('postulantes.index')->with('success', '¡Exámenes registrados! Promedio: ' . $promedio . '. Estado: ' . $estado_final);
+    }
 }

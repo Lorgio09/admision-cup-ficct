@@ -25,6 +25,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'fecha_nacimiento',
     'colegio_procedencia',
     'ciudad_residencia',
+    'promedio',
+    'carrera_admitida_id',
 ])]
 class Postulante extends Model
 {
@@ -46,5 +48,10 @@ class Postulante extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function evaluaciones()
+    {
+        return $this->hasMany(Evaluacion::class);
     }
 }
