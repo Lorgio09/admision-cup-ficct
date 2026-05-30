@@ -27,10 +27,6 @@
                                     Ir al Panel de Control
                                 </a>
                             @else
-                                <a href="{{ route('postulantes.create') }}" class="font-bold text-gray-600 hover:text-green-600 transition mr-4">
-                                    Inscribirse al CUP
-                                </a>
-
                                 <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
                                     Iniciar Sesión
                                 </a>
@@ -67,12 +63,22 @@
                 <h1 class="text-5xl font-extrabold text-gray-900 tracking-tight sm:text-6xl mb-6">
                     Sistema de Admisión Universitaria
                 </h1>
-                <p class="text-xl text-gray-600 mb-10 leading-relaxed">
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
                     Plataforma oficial para la gestión integral de postulantes, control de cupos por carrera y registro de evaluaciones.
                 </p>
+
+                <div class="mt-4 mb-12 flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <a href="{{ route('postulantes.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition transform hover:-translate-y-0.5 text-center w-full sm:w-auto text-lg">
+                        📝 Inscribirse al CUP
+                    </a>
+
+                    <a href="{{ route('consulta.index') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition transform hover:-translate-y-0.5 text-center w-full sm:w-auto text-lg">
+                        🔍 Consultar Estado y Pagar
+                    </a>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-7xl w-full">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12 max-w-7xl w-full">
                 
                 <a href="{{ route('postulantes.create') }}" class="block bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center hover:shadow-lg hover:-translate-y-1 transform transition duration-300 cursor-pointer">
                     <div class="text-5xl mb-4">📝</div>

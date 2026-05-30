@@ -73,11 +73,11 @@
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     
-                                    @if($postulante->estado === 'pendiente')
+                                    @if($postulante->estado === 'en_revision')
                                         <form action="{{ route('postulantes.aprobar', $postulante->id) }}" method="POST" class="inline-block mr-3">
                                             @csrf
-                                            <button type="submit" class="text-green-600 hover:text-green-900 font-bold" onclick="return confirm('¿Confirmas que los documentos son correctos y deseas inscribir oficialmente a este postulante?')">
-                                                Inscribir Alumno
+                                            <button type="submit" class="text-green-600 hover:text-green-900 font-bold" onclick="return confirm('¿Los documentos son correctos? Al aceptar, se le habilitará la pasarela de pago al alumno.')">
+                                                ✅ Aprobar para Pago
                                             </button>
                                         </form>
                                     @endif

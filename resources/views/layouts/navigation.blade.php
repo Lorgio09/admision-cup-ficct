@@ -28,6 +28,9 @@
                         <x-nav-link :href="route('docentes.index')" :active="request()->routeIs('docentes.*')">
                             {{ __('Docentes') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('grupos.index')" :active="request()->routeIs('grupos.*')">
+                           {{ __('Asignación de Grupos') }}
+                        </x-nav-link>
                     @endif
                     @if(Auth::user()->rol === 'docente')
                         <x-nav-link href="#" :active="false">

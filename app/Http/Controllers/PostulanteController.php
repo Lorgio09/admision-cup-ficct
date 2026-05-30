@@ -90,32 +90,34 @@ class PostulanteController extends Controller
     // 3. GUARDAR EL REGISTRO EN LA MEMORIA (SESIÓN)
     public function store(Request $request)
     {
-        // Validamos los datos
-        $datosValidados = $request->validate([
-            'ci' => 'required|unique:postulantes,ci',
+        // 1. Validaciones (Mantenlas tal cual las tienes)
+        $request->validate([
+            'ci' => 'required|string|unique:postulantes',
             'nombre' => 'required|string|max:255',
-            'correo' => 'required|email|unique:postulantes,correo',
-            'sexo' => 'required|in:M,F',
-            'telefono' => 'required|string|max:20',
-            'direccion' => 'required|string|max:255',
-            'carrera_primera_opcion_id' => 'required|exists:carreras,id',
-            'carrera_segunda_opcion_id' => 'required|exists:carreras,id|different:carrera_primera_opcion_id',
-            'certificado_bachiller' => 'accepted',
-            'ciudad_nacimiento' => 'required|string|max:100',
-            'fecha_nacimiento' => 'required|date|before:today',
-            'colegio_procedencia' => 'required|string|max:150',
-            'ciudad_residencia' => 'required|string|max:100',
-        ], [
-            'ci.unique' => 'Este CI ya está registrado en el sistema.',
-            'correo.unique' => 'Este correo ya está en uso.',
-            'carrera_segunda_opcion_id.different' => 'La segunda opción de carrera no puede ser igual a la primera.'
+            // ... (tus otras validaciones)
         ]);
 
-        // En vez de crear el registro en la BD, lo guardamos en la Sesión temporal
-        session()->put('datos_temporales_postulante', $datosValidados);
+        // 2. Guardamos físicamente al postulante de inmediato
+        Postulante::create([
+            'ci' => $request->ci,
+            'nombre' => $request->nombre,
+            'correo' => $request->correo,
+            'sexo' => $request->sexo,
+            'telefono' => $request->telefono,
+            'direccion' => $request->direccion,
+            'fecha_nacimiento' => $request->fecha_nacimiento,
+            'colegio_procedencia' => $request->colegio_procedencia,
+            'ciudad_residencia' => $request->ciudad_residencia,
+            'carrera_primera_opcion_id' => $request->carrera_primera_opcion_id,
+            'carrera_segunda_opcion_id' => $request->carrera_segunda_opcion_id,
+            'certificado_bachiller' => true, // O lo que uses para validar el archivo
+            'estado' => 'en_revision', // <--- NUEVO ESTADO INICIAL
+            'recibo_pago' => null, // Aún no paga
+        ]);
 
-        // Lo mandamos directamente a pagar
-        return redirect()->route('postulantes.checkout');
+        // 3. Redirigimos al inicio con un mensaje de éxito
+        // 3. Redirigimos a la pantalla de Inicio de Sesión (Login)
+        return redirect()->route('login')->with('status', '¡Registro completado! Tus datos están siendo revisados por Administración. Usa el botón "Consultar Estado" en esta pantalla para verificar si fuiste aprobado.');
     }
 
     // MOSTRAR PANTALLA DE PAGO
@@ -182,15 +184,15 @@ class PostulanteController extends Controller
         }
     }
 
+    // HABILITAR PASARELA DE PAGO AL ESTUDIANTE
     public function aprobar(Postulante $postulante)
     {
-        // Cambiamos el estado de forma directa
+        // Cambiamos el estado para que el alumno pueda pagar
         $postulante->update([
-            'estado' => 'inscrito'
+            'estado' => 'pendiente_pago'
         ]);
 
-        // Redirigimos de vuelta con un mensaje de éxito
-        return redirect()->route('postulantes.index')->with('success', '¡El postulante ' . $postulante->nombre . ' ha sido inscrito oficialmente en el sistema!');
+        return redirect()->route('postulantes.index')->with('success', '¡Documentos aprobados! El postulante ' . $postulante->nombre . ' ya puede acceder a la pasarela de pago.');
     }
 
     // MOSTRAR PANTALLA PARA INGRESAR NOTAS

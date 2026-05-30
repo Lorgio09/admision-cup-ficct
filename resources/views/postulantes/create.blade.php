@@ -57,12 +57,6 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div>
-                    <label for="ciudad_nacimiento" class="block font-medium text-sm text-gray-700">Ciudad de Nacimiento</label>
-                    <input id="ciudad_nacimiento" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="text" name="ciudad_nacimiento" value="{{ old('ciudad_nacimiento') }}" placeholder="Ej: Santa Cruz de la Sierra" required />
-                    @error('ciudad_nacimiento') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                </div>
-
-                <div>
                     <label for="fecha_nacimiento" class="block font-medium text-sm text-gray-700">Fecha de Nacimiento</label>
                     <input id="fecha_nacimiento" class="block mt-1 w-full border-gray-300 focus:border-blue-500 rounded-md shadow-sm" type="date" name="fecha_nacimiento" value="{{ old('fecha_nacimiento') }}" required />
                     @error('fecha_nacimiento') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
