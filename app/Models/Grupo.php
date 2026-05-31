@@ -9,7 +9,7 @@ class Grupo extends Model
 {
     use HasFactory;
 
-    // Agregamos turno y aula_id
+    // turno y aula_id
     protected $fillable = ['nombre', 'turno', 'aula_id'];
 
     public function postulantes()
