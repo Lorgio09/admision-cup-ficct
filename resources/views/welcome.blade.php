@@ -30,12 +30,7 @@
                                 <a href="{{ route('login') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-md transition transform hover:-translate-y-0.5">
                                     Iniciar Sesión
                                 </a>
-                                
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2.5 px-5 rounded-lg shadow-sm transition ml-2">
-                                        Registrarse
-                                    </a>
-                                @endif
+                            
                             @endauth
                         </nav>
                     @endif
