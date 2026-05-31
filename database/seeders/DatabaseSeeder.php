@@ -14,11 +14,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Creamos el usuario Administrador por defecto
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'lorgio.choque09@gmail.com'], // Condición de búsqueda
             [
                 'name' => 'Lorgio',
-                'password' => Hash::make('12345') // Contraseña segura
+                'password' => Hash::make('12345'), // Contraseña segura
+                'rol' => 'admin'
             ]
         );
     }
