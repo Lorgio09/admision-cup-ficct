@@ -40,14 +40,14 @@
 
         <main class="flex flex-col items-center justify-center mt-24 px-4 sm:px-6 lg:px-8">
             
-            @if(session('success'))
+            @if(session('status'))
                 <div class="max-w-4xl w-full mx-auto mb-10">
                     <div class="bg-green-50 border-l-8 border-green-500 rounded-r-xl shadow-md p-6 flex items-start transform transition-all duration-500 ease-in-out">
                         <div class="text-4xl mr-4">🎉</div>
                         <div>
                             <h3 class="text-xl font-bold text-green-900 mb-1">¡Inscripción Recibida!</h3>
                             <p class="text-green-800 text-md leading-relaxed">
-                                {{ session('success') }}
+                                {{ session('status') }}
                             </p>
                         </div>
                     </div>

@@ -117,7 +117,7 @@ class PostulanteController extends Controller
 
         // 3. Redirigimos al inicio con un mensaje de éxito
         // 3. Redirigimos a la pantalla de Inicio de Sesión (Login)
-        return redirect()->route('login')->with('status', '¡Registro completado! Tus datos están siendo revisados por Administración. Usa el botón "Consultar Estado" en esta pantalla para verificar si fuiste aprobado.');
+        return redirect()->route('/')->with('status', '¡Registro completado! Tus datos están siendo revisados por Administración. Usa el botón "Consultar Estado" en esta pantalla para verificar si fuiste aprobado.');
     }
 
     // MOSTRAR PANTALLA DE PAGO
