@@ -41,17 +41,8 @@ Route::get('/dashboard', function (Request $request) {
     // Si el usuario es un estudiante (no admin)
     if ($user->rol !== 'admin') {
         
-        // Buscamos su registro en la tabla postulantes
-        
-        $postulante = Postulante::where('correo', $user->correo)->first();
-
-        dd([
-            'Rol del usuario' => $user->rol,
-            'Email del usuario' => $user->email,
-            '¿Encontró al postulante?' => $postulante ? 'Sí' : 'No',
-            'Valor del grupo_id' => $postulante ? $postulante->grupo_id : 'No hay postulante',
-        ]);
-        // ============================
+        // CORRECCIÓN AQUÍ: Columna 'correo' de postulantes vs Propiedad 'email' de users
+        $postulante = \App\Models\Postulante::where('correo', $user->email)->first();
 
         if ($postulante && empty($postulante->grupo_id)) {
             return redirect()->route('grupo.seleccion');
