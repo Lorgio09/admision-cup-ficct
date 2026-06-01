@@ -42,10 +42,17 @@ Route::get('/dashboard', function (Request $request) {
     if ($user->rol !== 'admin') {
         
         // Buscamos su registro en la tabla postulantes
-        // OJO: Recuerda usar el mismo nombre de columna que usaste en el controlador (ej: 'email' o 'correo')
+        
         $postulante = Postulante::where('correo', $user->correo)->first();
 
-        // Si lo encuentra y NO tiene grupo asignado, lo desviamos a la selección
+        dd([
+            'Rol del usuario' => $user->rol,
+            'Email del usuario' => $user->email,
+            '¿Encontró al postulante?' => $postulante ? 'Sí' : 'No',
+            'Valor del grupo_id' => $postulante ? $postulante->grupo_id : 'No hay postulante',
+        ]);
+        // ============================
+
         if ($postulante && empty($postulante->grupo_id)) {
             return redirect()->route('grupo.seleccion');
         }
