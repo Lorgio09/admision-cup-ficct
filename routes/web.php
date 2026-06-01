@@ -46,7 +46,7 @@ Route::get('/dashboard', function (Request $request) {
         $postulante = Postulante::where('correo', $user->correo)->first();
 
         // Si lo encuentra y NO tiene grupo asignado, lo desviamos a la selección
-        if ($postulante && is_null($postulante->grupo_id)) {
+        if ($postulante && empty($postulante->grupo_id)) {
             return redirect()->route('grupo.seleccion');
         }
     }
