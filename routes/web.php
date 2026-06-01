@@ -1,12 +1,16 @@
 <?php
 
+use Illuminate\Http\Request;
+
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostulanteController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\DocenteController;
+use App\Http\Controllers\SeleccionGrupoController;
 use Illuminate\Support\Facades\Route;
+use App\Models\Postulante;
 
 Route::get('/', function () {
     return view('welcome');
@@ -31,10 +35,25 @@ Route::post('/consulta-cup/{postulante}/pagar', [ConsultaController::class, 'pag
 // ==========================================
 // RUTAS DEL PANEL (Requieren verificación)
 // ==========================================
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (Request $request) {
+    $user = $request->user();
+
+    // Si el usuario es un estudiante (no admin)
+    if ($user->rol !== 'admin') {
+        
+        // Buscamos su registro en la tabla postulantes
+        // OJO: Recuerda usar el mismo nombre de columna que usaste en el controlador (ej: 'email' o 'correo')
+        $postulante = Postulante::where('correo', $user->correo)->first();
+
+        // Si lo encuentra y NO tiene grupo asignado, lo desviamos a la selección
+        if ($postulante && is_null($postulante->grupo_id)) {
+            return redirect()->route('grupo.seleccion');
+        }
+    }
+
+    // Si ya tiene grupo (o es admin), entra normal a su panel
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 // ==========================================
 // RUTAS PRIVADAS (Requieren iniciar sesión)
 // ==========================================
@@ -61,6 +80,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/grupos', [\App\Http\Controllers\GrupoController::class, 'store'])->name('grupos.store');
     Route::post('/grupos/generar', [\App\Http\Controllers\GrupoController::class, 'generar'])->name('grupos.generar');
     Route::delete('/grupos/{grupo}', [\App\Http\Controllers\GrupoController::class, 'destroy'])->name('grupos.destroy'); 
+
+    Route::get('/seleccionar-grupo', [SeleccionGrupoController::class, 'index'])->name('grupo.seleccion');
+    Route::post('/seleccionar-grupo', [SeleccionGrupoController::class, 'store'])->name('grupo.asignar');
 });
 
 require __DIR__.'/auth.php';
