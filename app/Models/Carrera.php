@@ -23,4 +23,11 @@ class Carrera extends Model
     {
         return $this->hasMany(Postulante::class, 'carrera_segunda_opcion_id');
     }
+
+    public function gestiones()
+    {
+        return $this->belongsToMany(Gestion::class, 'carrera_gestion')
+                    ->withPivot('cupo_maximo')
+                    ->withTimestamps();
+    }
 }

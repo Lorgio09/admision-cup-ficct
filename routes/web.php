@@ -9,8 +9,10 @@ use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\SeleccionGrupoController;
+use App\Http\Controllers\Admin\GestionController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Postulante;
+use App\Models\Gestion;
 
 Route::get('/', function () {
     return view('welcome');
@@ -38,10 +40,7 @@ Route::post('/consulta-cup/{postulante}/pagar', [ConsultaController::class, 'pag
 Route::get('/dashboard', function (Request $request) {
     $user = $request->user();
 
-    // Si el usuario es un estudiante (no admin)
     if ($user->rol !== 'admin') {
-        
-        // CORRECCIÓN AQUÍ: Columna 'correo' de postulantes vs Propiedad 'email' de users
         $postulante = \App\Models\Postulante::where('correo', $user->email)->first();
 
         if ($postulante && empty($postulante->grupo_id)) {
@@ -49,8 +48,11 @@ Route::get('/dashboard', function (Request $request) {
         }
     }
 
-    // Si ya tiene grupo (o es admin), entra normal a su panel
-    return view('dashboard');
+    // Buscamos cuál es el semestre que está activo actualmente
+    $gestionActiva = Gestion::where('is_active', true)->first();
+
+    // Se lo enviamos a la vista
+    return view('dashboard', compact('gestionActiva'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 // ==========================================
 // RUTAS PRIVADAS (Requieren iniciar sesión)
@@ -81,6 +83,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/seleccionar-grupo', [SeleccionGrupoController::class, 'index'])->name('grupo.seleccion');
     Route::post('/seleccionar-grupo', [SeleccionGrupoController::class, 'store'])->name('grupo.asignar');
+
+    Route::get('/admin/gestiones/crear', [GestionController::class, 'create'])->name('gestiones.create');
+    Route::post('/admin/gestiones', [GestionController::class, 'store'])->name('gestiones.store');
 });
 
 require __DIR__.'/auth.php';

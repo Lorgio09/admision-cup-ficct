@@ -13,7 +13,8 @@ class CarreraSeeder extends Seeder
             // Inicializamos el cupo en 0 hasta que el administrador lo asigne en el sistema
             ['codigo' => '187-3', 'nombre' => 'Ingeniería en Sistemas', 'cupo' => 0],
             ['codigo' => '187-4', 'nombre' => 'Ingeniería Informática', 'cupo' => 0],
-            ['codigo' => '187-5', 'nombre' => 'Ingeniería en Redes y Telecomunicaciones', 'cupo' => 0]
+            ['codigo' => '187-5', 'nombre' => 'Ingeniería en Redes y Telecomunicaciones', 'cupo' => 0],
+            ['codigo' => '187-6', 'nombre' => 'Ingeniería en Robotica', 'cupo' => 0]
         ];
 
         foreach ($carreras as $carrera) {
