@@ -6,6 +6,7 @@ use App\Models\Grupo;
 use App\Models\Postulante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Gestion;
 
 class GrupoController extends Controller
 {
@@ -33,13 +34,20 @@ class GrupoController extends Controller
             'aula_id' => 'nullable|exists:aulas,id'
         ]);
 
+        $hora_inicio = ($request->turno === 'Mañana') ? '07:00:00' : '14:00:00';
+        $hora_fin    = ($request->turno === 'Mañana') ? '13:00:00' : '20:00:00';
+        $gestionActiva = Gestion::where('is_active', true)->first();
+
         Grupo::create([
             'nombre' => $request->nombre,
             'turno' => $request->turno,
             'aula_id' => $request->aula_id,
+            'hora_inicio' => $hora_inicio,
+            'hora_fin' => $hora_fin,
+            'gestion_id' => $gestionActiva->id
         ]);
 
-        return back()->with('success', 'Grupo creado exitosamente. Ahora puedes asignarle alumnos.');
+        return back()->with('status', 'Grupo creado exitosamente con sus horarios asignados.');
     }
 
     // 3. LLENAR LOS GRUPOS EXISTENTES (INTELIGENTE)

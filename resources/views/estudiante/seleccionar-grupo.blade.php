@@ -43,8 +43,33 @@
                                         </div>
                                         
                                         <div class="text-sm text-gray-600 mb-6 space-y-2 bg-white p-4 rounded-lg border border-gray-100">
-                                            <p class="flex justify-between"><strong>Turno:</strong> <span>{{ $grupo->turno ?? 'No especificado' }}</span></p>
-                                            <p class="flex justify-between"><strong>Aula:</strong> <span>{{ $grupo->aula_id ?? 'Por asignar' }}</span></p>
+                                            <p class="flex justify-between items-center">
+                                                <strong>Turno:</strong> 
+                                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">{{ $grupo->turno ?? 'No especificado' }}</span>
+                                            </p>
+                                            
+                                            <div class="py-2 border-t border-b border-gray-100 my-2">
+                                                <p class="flex items-center text-gray-700 mb-1">
+                                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                                    <strong>Días:</strong> <span class="ml-auto">{{ $grupo->dias ?? 'Lunes a Sábado' }}</span>
+                                                </p>
+                                                <p class="flex items-center text-gray-700 mb-1">
+                                                    <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                    <strong>Horario:</strong> 
+                                                    <span class="ml-auto font-medium">
+                                                        @if($grupo->hora_inicio && $grupo->hora_fin)
+                                                            {{ \Carbon\Carbon::parse($grupo->hora_inicio)->format('H:i') }} - {{ \Carbon\Carbon::parse($grupo->hora_fin)->format('H:i') }}
+                                                        @else
+                                                            Pendiente
+                                                        @endif
+                                                    </span>
+                                                </p>
+                                                <p class="text-xs text-gray-500 text-right italic mt-1">(4 materias diarias de 1.5 hrs)</p>
+                                            </div>
+                                            <p class="flex justify-between items-center text-gray-700">
+                                                <strong>Aula:</strong> 
+                                                <span>{{ $grupo->aula_id ?? 'Por asignar' }}</span>
+                                            </p>
                                             <p class="flex justify-between text-blue-800 font-semibold mt-2 pt-2 border-t">
                                                 Inscritos actuales: <span>{{ $grupo->postulantes_count }} / 70</span>
                                             </p>
