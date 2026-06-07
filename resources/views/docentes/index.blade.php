@@ -26,6 +26,7 @@
                                     <th class="px-6 py-4">CI</th>
                                     <th class="px-6 py-4">Nombre Completo</th>
                                     <th class="px-6 py-4">Teléfono</th>
+                                    <th class="px-6 py-4">Materia</th>
                                     <th class="px-6 py-4">Correo Electrónico (Usuario)</th>
                                     <th class="px-6 py-4 text-center">Acciones</th>
                                 </tr>
@@ -36,6 +37,7 @@
                                         <td class="px-6 py-4 font-bold">{{ $docente->ci }}</td>
                                         <td class="px-6 py-4">{{ $docente->nombre }}</td>
                                         <td class="px-6 py-4">{{ $docente->telefono }}</td>
+                                        <td class="px-6 py-4">{{ $docente->materia->nombre ?? 'Sin asignar' }}</td>
                                         <td class="px-6 py-4 text-blue-600">{{ $docente->user->email ?? 'Sin cuenta' }}</td>
                                         <td class="px-6 py-4 flex justify-center gap-3">
                                             <a href="{{ route('docentes.edit', $docente) }}" class="text-blue-500 hover:text-blue-700 font-medium">Editar</a>

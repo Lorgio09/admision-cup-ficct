@@ -30,6 +30,17 @@
                         @error('nombre') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
 
+                    <div class="mb-4">
+                      <label for="materia_id" class="block font-medium text-sm text-gray-700">Materia a dictar</label>
+                      <select name="materia_id" id="materia_id" required
+                          class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                         <option value="" disabled selected>-- Seleccione una materia --</option>
+                          @foreach($materias as $materia)
+                             <option value="{{ $materia->id }}">{{ $materia->nombre }} ({{ $materia->codigo }})</option>
+                          @endforeach
+                       </select>
+                    </div>
+
                     <div class="mt-4">
                         <label for="correo" class="block font-medium text-sm text-gray-700">Correo Electrónico (Para iniciar sesión)</label>
                         <input type="email" name="correo" id="correo" class="border-gray-300 focus:border-indigo-500 rounded-md shadow-sm w-full mt-1" value="{{ old('correo') }}" required>

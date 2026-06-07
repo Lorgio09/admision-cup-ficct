@@ -16,4 +16,10 @@ class Materia extends Model
     {
         return $this->hasMany(Examen::class);
     }
+
+    // Relación: Una materia puede tener muchos docentes asignados
+    public function docentes()
+    {
+        return $this->hasMany(Docente::class);
+    }
 }

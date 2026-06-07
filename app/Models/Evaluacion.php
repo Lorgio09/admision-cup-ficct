@@ -11,19 +11,20 @@ class Evaluacion extends Model
 
     protected $table = 'evaluaciones';
 
+    // Actualizamos los campos permitidos
     protected $fillable = [
-        'postulante_id',
-        'materia_id',
-        'nota',
+        'postulante_id', 
+        'materia_id', 
+        'nota1', 
+        'nota2', 
+        'nota3'
     ];
 
-    // Una evaluación pertenece a un postulante
     public function postulante()
     {
         return $this->belongsTo(Postulante::class);
     }
 
-    // Una evaluación pertenece a una materia
     public function materia()
     {
         return $this->belongsTo(Materia::class);

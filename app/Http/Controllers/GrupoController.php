@@ -7,22 +7,37 @@ use App\Models\Postulante;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Gestion;
+use App\Models\Docente;
+use App\Models\Materia;
+use App\Models\Aula;
 
 class GrupoController extends Controller
 {
     // 1. MOSTRAR EL PANEL
     public function index()
     {
-        $totalInscritos = Postulante::where('estado', 'inscrito')->count();
-        $cantidadGruposRequeridos = ceil($totalInscritos / 70);
-        
-        // Traemos las aulas con DB facade para evitar errores si aún no creaste el Modelo Aula
-        $aulas = DB::table('aulas')->get(); 
-        
-        $grupos = Grupo::with('postulantes')->get();
-        $pendientesDeAsignar = Postulante::where('estado', 'inscrito')->whereNull('grupo_id')->count();
+        $gestionActiva = Gestion::where('is_active', true)->first();
 
-        return view('grupos.index', compact('totalInscritos', 'cantidadGruposRequeridos', 'grupos', 'pendientesDeAsignar', 'aulas'));
+        if (!$gestionActiva) {
+            return redirect()->route('dashboard')->with('error', 'Debe aperturar un semestre primero.');
+        }
+
+        // 1. Cargamos los grupos con sus aulas y sus asignaciones (eager loading)
+        $grupos = Grupo::with(['aula', 'asignaciones.docente', 'asignaciones.materia'])
+            ->withCount('postulantes')
+            ->where('gestion_id', $gestionActiva->id)
+            ->get();
+
+        // 2. Cargamos docentes y materias para los selectores internos
+        $docentes = Docente::all();
+        $materias = Materia::all();
+        $aulas = Aula::all();
+
+        // ... Conserva aquí tus variables de estadísticas (Total alumnos inscritos, etc.) ...
+        $totalInscritos = \App\Models\Postulante::whereNotNull('grupo_id')->count(); // Ejemplo
+        $pendientesDeAsignar = \App\Models\Postulante::whereNull('grupo_id')->count();
+
+        return view('grupos.index', compact('grupos', 'docentes', 'materias', 'aulas', 'totalInscritos', 'pendientesDeAsignar', 'gestionActiva'));
     }
 
     // 2. CREAR GRUPO MANUALMENTE (NUEVO)

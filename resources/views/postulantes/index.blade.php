@@ -36,6 +36,7 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CI</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Correo</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Primera Opción</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Segunda Opción</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
@@ -47,7 +48,7 @@
                             <tr class="hover:bg-gray-50 transition">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $postulante->ci }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $postulante->nombre }}</td>
-                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{{ $postulante->correo }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                     {{ $postulante->primeraOpcion->nombre ?? 'Sin asignar' }}
                                 </td>
@@ -81,10 +82,6 @@
                                             </button>
                                         </form>
                                     @endif
-
-                                    <a href="{{ route('postulantes.evaluar', $postulante->id) }}" class="text-orange-600 hover:text-orange-900 font-semibold mr-3">
-                                        Evaluar
-                                    </a>
 
                                     <a href="{{ route('postulantes.edit', $postulante->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</a>
                                     

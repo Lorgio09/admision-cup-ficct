@@ -9,7 +9,14 @@ class Docente extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['ci', 'nombre', 'telefono', 'user_id'];
+    protected $fillable = [
+        'ci', 
+        'nombre', 
+        'correo', 
+        'telefono', 
+        'user_id',
+        'materia_id'
+    ];
 
     // Un docente tiene una cuenta de usuario
     public function user()
@@ -21,5 +28,10 @@ class Docente extends Model
     public function grupoMaterias()
     {
         return $this->hasMany(GrupoMateria::class);
+    }
+
+    public function materia()
+    {
+        return $this->belongsTo(Materia::class);
     }
 }

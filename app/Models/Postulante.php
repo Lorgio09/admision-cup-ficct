@@ -54,4 +54,9 @@ class Postulante extends Model
     {
         return $this->hasMany(Evaluacion::class);
     }
+
+    public function grupo()
+    {
+        return $this->belongsTo(Grupo::class);
+    }
 }

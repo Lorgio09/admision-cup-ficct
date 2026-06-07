@@ -9,6 +9,8 @@ use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\ConsultaController;
 use App\Http\Controllers\DocenteController;
 use App\Http\Controllers\SeleccionGrupoController;
+use App\Http\Controllers\CalificacionController;
+use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\Admin\GestionController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Postulante;
@@ -37,22 +39,30 @@ Route::post('/consulta-cup/{postulante}/pagar', [ConsultaController::class, 'pag
 // ==========================================
 // RUTAS DEL PANEL (Requieren verificación)
 // ==========================================
-Route::get('/dashboard', function (Request $request) {
+Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     $user = $request->user();
+    $gestionActiva = \App\Models\Gestion::where('is_active', true)->first();
 
+    // LÓGICA PARA POSTULANTES Y DOCENTES
     if ($user->rol !== 'admin') {
         $postulante = \App\Models\Postulante::where('correo', $user->email)->first();
 
+        // Si es postulante y no tiene grupo, lo mandamos a elegir
         if ($postulante && empty($postulante->grupo_id)) {
             return redirect()->route('grupo.seleccion');
         }
+
+        // Si es postulante y YA tiene grupo, cargamos toda su información académica
+        if ($user->rol === 'postulante' && $postulante) {
+            // Eager loading: Traemos su grupo, el aula física, y a los docentes asignados
+            $postulante->load(['grupo.aula', 'grupo.asignaciones.materia', 'grupo.asignaciones.docente']);
+            return view('dashboard', compact('gestionActiva', 'postulante'));
+        }
     }
 
-    // Buscamos cuál es el semestre que está activo actualmente
-    $gestionActiva = Gestion::where('is_active', true)->first();
-
-    // Se lo enviamos a la vista
+    // LÓGICA PARA ADMINISTRADORES
     return view('dashboard', compact('gestionActiva'));
+
 })->middleware(['auth', 'verified'])->name('dashboard');
 // ==========================================
 // RUTAS PRIVADAS (Requieren iniciar sesión)
@@ -86,6 +96,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/gestiones/crear', [GestionController::class, 'create'])->name('gestiones.create');
     Route::post('/admin/gestiones', [GestionController::class, 'store'])->name('gestiones.store');
+
+    Route::post('/asignaciones', [AsignacionController::class, 'store'])->name('asignaciones.store');
+    Route::delete('/asignaciones/{asignacion}', [AsignacionController::class, 'destroy'])->name('asignaciones.destroy');
+
+    Route::get('/calificaciones', [CalificacionController::class, 'index'])->name('calificaciones.index');
+    Route::get('/calificaciones/planilla/{asignacion}', [CalificacionController::class, 'planilla'])->name('calificaciones.planilla');
+    Route::post('/calificaciones/planilla/{asignacion}', [App\Http\Controllers\CalificacionController::class, 'guardar'])->name('calificaciones.guardar');
 });
 
 require __DIR__.'/auth.php';

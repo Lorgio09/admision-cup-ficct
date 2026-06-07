@@ -10,8 +10,10 @@ class SeleccionGrupoController extends Controller
 {
     public function index()
     {
+        $gestionActiva = \App\Models\Gestion::where('is_active', true)->first();
         // 1. Buscamos solo los grupos que tengan MENOS de 70 postulantes
-        $gruposDisponibles = Grupo::withCount('postulantes')
+        $gruposDisponibles = Grupo::where('gestion_id', $gestionActiva->id)
+            ->withCount('postulantes')
             ->has('postulantes', '<', 70)
             ->get();
 

@@ -94,24 +94,7 @@
                 </form>
             </div>
 
-            @if($pendientesDeAsignar > 0)
-                <div class="bg-gradient-to-r from-blue-800 to-indigo-900 rounded-lg shadow-md p-6 mb-8 text-white flex flex-col md:flex-row items-center justify-between">
-                    <div class="mb-4 md:mb-0">
-                        <h3 class="text-lg font-bold">Distribución de Alumnos Pendiente</h3>
-                        <p class="text-blue-200 text-sm mt-1">
-                            Hay {{ $pendientesDeAsignar }} postulantes listos. El sistema los insertará automáticamente en los grupos que hayas creado que aún tengan sillas disponibles (Máx. 70).
-                        </p>
-                    </div>
-                    <form action="{{ route('grupos.generar') }}" method="POST" class="w-full md:w-auto">
-                        @csrf
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-gray-900 font-extrabold py-3 px-6 rounded-lg shadow transition transform hover:-translate-y-0.5 text-center">
-                            🚀 Llenar Grupos Existentes
-                        </button>
-                    </form>
-                </div>
-            @endif
-
-            <h3 class="text-xl font-bold text-gray-800 mb-4 tracking-tight">Distribución Física de Aulas</h3>
+            <h3 class="text-xl font-bold text-gray-800 mb-4 tracking-tight">Distribución Física de Aulas y Docentes</h3>
 
             @if($grupos->isEmpty())
                 <div class="bg-white p-12 rounded-lg shadow-sm text-center text-gray-500 border border-gray-200">
@@ -123,6 +106,7 @@
                 <div class="space-y-8">
                     @foreach($grupos as $grupo)
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
+                            
                             <div class="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                 <div class="flex items-center gap-3">
                                     <span class="text-xl font-bold text-gray-900">{{ $grupo->nombre }}</span>
@@ -146,19 +130,67 @@
                                 </div>
                             </div>
 
-                            <div class="p-4 overflow-x-auto max-h-96 overflow-y-auto">
-                                <table class="min-w-full divide-y divide-gray-200">
+                            <div class="p-6 bg-white border-b border-gray-100">
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Carga Académica (Docentes asignados)</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    @foreach($materias as $materia)
+                                        @php
+                                            $asignacion = $grupo->asignaciones->firstWhere('materia_id', $materia->id);
+                                        @endphp
+                                        <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col justify-between">
+                                            <div>
+                                                <span class="text-xs font-bold text-blue-800 bg-blue-100 px-2 py-1 rounded border border-blue-200">{{ $materia->nombre }}</span>
+                                                @if($asignacion)
+                                                    <p class="text-sm font-bold text-gray-900 mt-3 truncate" title="{{ $asignacion->docente->nombre }}">{{ $asignacion->docente->nombre }}</p>
+                                                @else
+                                                    <p class="text-xs italic text-gray-400 mt-3 mb-1">Sin docente asignado</p>
+                                                @endif
+                                            </div>
+
+                                            <div class="mt-4 pt-3 border-t border-gray-200">
+                                                @if($asignacion)
+                                                    <form action="{{ route('asignaciones.destroy', $asignacion->id) }}" method="POST" onsubmit="return confirm('¿Quitar a este docente?')">
+                                                        @csrf @method('DELETE')
+                                                        <button type="submit" class="text-xs font-bold text-red-500 hover:text-red-700 flex items-center gap-1 transition">
+                                                            ✕ Quitar docente
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <form action="{{ route('asignaciones.store') }}" method="POST" class="flex items-center gap-2">
+                                                        @csrf
+                                                        <input type="hidden" name="grupo_id" value="{{ $grupo->id }}">
+                                                        <input type="hidden" name="materia_id" value="{{ $materia->id }}">
+                                                        <select name="docente_id" required class="text-xs border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 flex-1 py-1 px-2">
+                                                            <option value="" disabled selected>Elegir...</option>
+                                                            @foreach($docentes as $docente)
+                                                                <option value="{{ $docente->id }}">{{ $docente->nombre }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 rounded shadow transition font-bold text-xs">
+                                                            +
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div class="p-6 overflow-x-auto max-h-96 overflow-y-auto bg-gray-50/50">
+                                <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Postulantes Inscritos</h4>
+                                <table class="min-w-full divide-y divide-gray-200 bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
                                     <thead class="bg-gray-100">
                                         <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nro.</th>
-                                            <th class="px-6 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">CI</th>
-                                            <th class="px-6 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Completo</th>
-                                            <th class="px-6 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Primera Opción Carrera</th>
+                                            <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nro.</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">CI</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Completo</th>
+                                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Primera Opción Carrera</th>
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-100">
-                                        @foreach($grupo->postulantes as $index => $alumno)
-                                            <tr class="hover:bg-gray-50 transition">
+                                        @forelse($grupo->postulantes as $index => $alumno)
+                                            <tr class="hover:bg-blue-50 transition">
                                                 <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400 font-mono">{{ $index + 1 }}</td>
                                                 <td class="px-6 py-3 whitespace-nowrap text-sm font-semibold text-gray-900">{{ $alumno->ci }}</td>
                                                 <td class="px-6 py-3 whitespace-nowrap text-sm text-gray-700">{{ $alumno->nombre }}</td>
@@ -166,10 +198,15 @@
                                                     {{ $alumno->primeraOpcion->nombre ?? 'Sin carrera' }}
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="4" class="px-6 py-8 text-center text-gray-400 italic">No hay estudiantes inscritos en este grupo todavía.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>
+                            
                         </div>
                     @endforeach
                 </div>
