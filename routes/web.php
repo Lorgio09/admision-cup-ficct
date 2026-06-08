@@ -12,6 +12,7 @@ use App\Http\Controllers\SeleccionGrupoController;
 use App\Http\Controllers\CalificacionController;
 use App\Http\Controllers\AsignacionController;
 use App\Http\Controllers\Admin\GestionController;
+use App\Http\Controllers\Admin\ReporteAdmisionController;
 use Illuminate\Support\Facades\Route;
 use App\Models\Postulante;
 use App\Models\Gestion;
@@ -103,6 +104,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/calificaciones', [CalificacionController::class, 'index'])->name('calificaciones.index');
     Route::get('/calificaciones/planilla/{asignacion}', [CalificacionController::class, 'planilla'])->name('calificaciones.planilla');
     Route::post('/calificaciones/planilla/{asignacion}', [App\Http\Controllers\CalificacionController::class, 'guardar'])->name('calificaciones.guardar');
+
+    // Rutas para administrar la Gestión y los Cupos
+    Route::get('/gestiones/{gestion}/editar', [App\Http\Controllers\Admin\GestionController::class, 'edit'])->name('gestiones.edit');
+    Route::put('/gestiones/{gestion}', [App\Http\Controllers\Admin\GestionController::class, 'update'])->name('gestiones.update');
+
+    Route::post('/gestiones/{gestion}/procesar-admisiones', [App\Http\Controllers\Admin\GestionController::class, 'procesarAdmisiones'])->name('gestiones.procesar');
+
+    Route::get('/admisiones/resultados', [ReporteAdmisionController::class, 'index'])->name('admisiones.resultados');
 });
 
 require __DIR__.'/auth.php';

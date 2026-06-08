@@ -34,6 +34,10 @@
                         <x-nav-link :href="route('calificaciones.index')" :active="request()->routeIs('calificaciones.*')">
                            {{ __('Calificaciones') }}
                         </x-nav-link>
+
+                        <x-nav-link :href="route('admisiones.resultados')" :active="request()->routeIs('admisiones.resultados')">
+                            {{ __('Resultados') }}
+                        </x-nav-link>
                     @endif
 
                     @if(Auth::user()->rol === 'docente')
@@ -113,6 +117,10 @@
 
                 <x-responsive-nav-link :href="route('calificaciones.index')" :active="request()->routeIs('calificaciones.*')">
                     {{ __('Calificaciones') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admisiones.resultados')" :active="request()->routeIs('admisiones.resultados')">
+                    {{ __('Resultados') }}
                 </x-responsive-nav-link>
             @endif
 

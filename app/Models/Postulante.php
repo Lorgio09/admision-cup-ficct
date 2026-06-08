@@ -59,4 +59,8 @@ class Postulante extends Model
     {
         return $this->belongsTo(Grupo::class);
     }
+
+    public function carreraAdmitida() {
+        return $this->belongsTo(Carrera::class, 'carrera_admitida_id');
+    }
 }
