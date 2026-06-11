@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\Admin\ReporteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PostulanteController;
 use App\Http\Controllers\CarreraController;
@@ -44,7 +45,9 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     $user = $request->user();
     $gestionActiva = \App\Models\Gestion::where('is_active', true)->first();
 
-    // LÓGICA PARA POSTULANTES Y DOCENTES
+    // ==========================================
+    // 1. LÓGICA PARA POSTULANTES Y DOCENTES
+    // ==========================================
     if ($user->rol !== 'admin') {
         $postulante = \App\Models\Postulante::where('correo', $user->email)->first();
 
@@ -59,10 +62,37 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
             $postulante->load(['grupo.aula', 'grupo.asignaciones.materia', 'grupo.asignaciones.docente']);
             return view('dashboard', compact('gestionActiva', 'postulante'));
         }
+
+        // Si es Docente, evitamos la lógica de arriba y va directo a su vista básica
+        return view('dashboard', compact('gestionActiva'));
     }
 
-    // LÓGICA PARA ADMINISTRADORES
-    return view('dashboard', compact('gestionActiva'));
+    // ==========================================
+    // 2. LÓGICA EXCLUSIVA PARA ADMINISTRADORES
+    // ==========================================
+    $kpisDashboard = null;
+
+    // Solo calculamos los indicadores si existe un semestre activo
+    if ($gestionActiva) {
+        $kpisDashboard = [
+            'total'      => \App\Models\Postulante::whereHas('grupo', function($q) use ($gestionActiva) {
+                                $q->where('gestion_id', $gestionActiva->id);
+                            })->count(),
+                            
+            'aprobados'  => \App\Models\Postulante::whereHas('grupo', function($q) use ($gestionActiva) {
+                                $q->where('gestion_id', $gestionActiva->id);
+                            })->where('promedio', '>=', 60)->count(),
+                            
+            'reprobados' => \App\Models\Postulante::whereHas('grupo', function($q) use ($gestionActiva) {
+                                $q->where('gestion_id', $gestionActiva->id);
+                            })->whereNotNull('promedio')->where('promedio', '<', 60)->count(),
+                            
+            'grupos'     => \App\Models\Grupo::where('gestion_id', $gestionActiva->id)->count()
+        ];
+    }
+
+    // Retorna la vista del administrador con sus indicadores y el asistente de voz listo
+    return view('dashboard', compact('gestionActiva', 'kpisDashboard'));
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 // ==========================================
@@ -112,6 +142,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/gestiones/{gestion}/procesar-admisiones', [App\Http\Controllers\Admin\GestionController::class, 'procesarAdmisiones'])->name('gestiones.procesar');
 
     Route::get('/admisiones/resultados', [ReporteAdmisionController::class, 'index'])->name('admisiones.resultados');
+
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+
+    Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+    Route::get('/reportes/pdf', [ReporteController::class, 'exportarPdf'])->name('reportes.pdf');
+
+    Route::get('/reportes/excel', [ReporteController::class, 'exportarExcel'])->name('reportes.excel');
 });
 
 require __DIR__.'/auth.php';

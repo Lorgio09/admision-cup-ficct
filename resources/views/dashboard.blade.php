@@ -22,6 +22,42 @@
                             <h3 class="text-2xl font-bold text-gray-800">¡Bienvenido, {{ Auth::user()->name }}!</h3>
                             <p class="text-gray-500 mt-1">Has iniciado sesión como <strong>Administrador</strong>. Desde aquí puedes gestionar los catálogos del sistema, asignar cupos y registrar nuevo personal.</p>
                         </div>
+
+                        @if(isset($kpisDashboard))
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                                <div class="bg-gradient-to-br from-blue-50 to-white p-4 rounded-xl border border-blue-100 shadow-sm flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Inscritos</p>
+                                        <p class="text-2xl font-black text-blue-900 mt-1">{{ $kpisDashboard['total'] }}</p>
+                                    </div>
+                                    <div class="text-2xl bg-blue-100 p-2 rounded-lg">👥</div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-green-50 to-white p-4 rounded-xl border border-green-100 shadow-sm flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-green-600 uppercase tracking-wider">Aprobados</p>
+                                        <p class="text-2xl font-black text-green-900 mt-1">{{ $kpisDashboard['aprobados'] }}</p>
+                                    </div>
+                                    <div class="text-2xl bg-green-100 p-2 rounded-lg">✅</div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-red-50 to-white p-4 rounded-xl border border-red-100 shadow-sm flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-red-600 uppercase tracking-wider">Reprobados</p>
+                                        <p class="text-2xl font-black text-red-900 mt-1">{{ $kpisDashboard['reprobados'] }}</p>
+                                    </div>
+                                    <div class="text-2xl bg-red-100 p-2 rounded-lg">❌</div>
+                                </div>
+                        
+                                <div class="bg-gradient-to-br from-purple-50 to-white p-4 rounded-xl border border-purple-100 shadow-sm flex items-center justify-between">
+                                    <div>
+                                        <p class="text-xs font-bold text-purple-600 uppercase tracking-wider">Grupos Activos</p>
+                                        <p class="text-2xl font-black text-purple-900 mt-1">{{ $kpisDashboard['grupos'] }}</p>
+                                    </div>
+                                    <div class="text-2xl bg-purple-100 p-2 rounded-lg">🏫</div>
+                                </div>
+                            </div>
+                        @endif
                         
                         @if(isset($gestionActiva))
                             <div class="mb-6 bg-gradient-to-r from-green-50 to-white border border-green-200 rounded-xl shadow-sm p-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -181,4 +217,99 @@
 
         </div>
     </div>
+
+    @if(Auth::user()->rol === 'admin')
+        <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+            <div id="voice-status" class="bg-gray-900 text-white text-xs font-bold px-3 py-1.5 rounded-lg shadow-md hidden animate-pulse">
+                🎙️ Escuchando comando...
+            </div>
+            <button id="btn-voice" onclick="activarAsistenteVoz()" class="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white p-4 rounded-full shadow-lg transition transform hover:scale-110 flex items-center justify-center border-2 border-white">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            </button>
+        </div>
+
+        <script>
+            function activarAsistenteVoz() {
+                // Verificar soporte del navegador (Chrome, Edge, Safari lo soportan nativamente)
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    alert("Tu navegador no soporta el reconocimiento de voz. Te recomendamos usar Google Chrome.");
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'es-BO'; // Configurado para español de Bolivia
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                const statusDiv = document.getElementById('voice-status');
+                const btnVoice = document.getElementById('btn-voice');
+
+                // Al iniciar la escucha
+                recognition.onstart = () => {
+                    statusDiv.classList.remove('hidden');
+                    btnVoice.classList.add('ring-4', 'ring-indigo-300');
+                };
+
+                // Al terminar (por éxito o error)
+                recognition.onend = () => {
+                    statusDiv.classList.add('hidden');
+                    btnVoice.classList.remove('ring-4', 'ring-indigo-300');
+                };
+
+                // Procesamiento del Audio con el Algoritmo de Coincidencias
+                recognition.onresult = (event) => {
+                    const textoEscuchado = event.results[0][0].transcript.toLowerCase();
+                    console.log("Comando recibido: " + textoEscuchado);
+
+                    // 1. Comando: Mostrar módulo general de reportes estadísticos
+                    if (textoEscuchado.includes('reportes') || textoEscuchado.includes('estadísticas') || textoEscuchado.includes('ver reportes')) {
+                        alert('🤖 Asistente: Abriendo Módulo de Reportes...');
+                        window.location.href = "{{ route('reportes.index') }}";
+                    }
+                    
+                    // 2. Comando: Ver la lista oficial de admitidos por mérito
+                    else if (textoEscuchado.includes('admitidos') || textoEscuchado.includes('resultados') || textoEscuchado.includes('lista oficial')) {
+                        alert('🤖 Asistente: Redirigiendo a la Lista de Admitidos...');
+                        window.location.href = "{{ route('admisiones.resultados') }}";
+                    }
+
+                    // 3. Comando: Navegar al control financiero / lista de postulantes
+                    else if (textoEscuchado.includes('postulantes') || textoEscuchado.includes('inscritos') || textoEscuchado.includes('ver postulantes')) {
+                        alert('🤖 Asistente: Abriendo Lista de Postulantes...');
+                        window.location.href = "{{ route('postulantes.index') }}";
+                    }
+
+                    // 4. Comando: Descargar el Acta PDF automáticamente
+                    else if (textoEscuchado.includes('descargar pdf') || textoEscuchado.includes('exportar pdf') || textoEscuchado.includes('imprimir acta')) {
+                        alert('🤖 Asistente: Generando y descargando Acta de Resultados en PDF...');
+                        window.location.href = "{{ route('reportes.pdf', ['gestion_id' => $gestionActiva->id ?? '']) }}";
+                    }
+
+                    // 5. Comando: Descargar la planilla Excel automáticamente
+                    else if (textoEscuchado.includes('descargar excel') || textoEscuchado.includes('exportar excel') || textoEscuchado.includes('bajar excel')) {
+                        alert('🤖 Asistente: Generando y descargando reporte en formato Excel...');
+                        window.location.href = "{{ route('reportes.excel', ['gestion_id' => $gestionActiva->id ?? '']) }}";
+                    }
+
+                    // Si no entiende el comando
+                    else {
+                        alert('🤖 Asistente: Comando "' + textoEscuchado + '" no reconocido. Intenta con: "Ver reportes", "Descargar PDF", "Ver admitidos" o "Ver postulantes".');
+                    }
+                };
+
+                // Manejo de errores de captura
+                recognition.onerror = (event) => {
+                    console.error(event.error);
+                    statusDiv.classList.add('hidden');
+                };
+
+                // Iniciar captura de micrófono
+                recognition.start();
+            }
+        </script>
+    @endif
 </x-app-layout>
