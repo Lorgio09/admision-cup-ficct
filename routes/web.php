@@ -149,6 +149,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/reportes/pdf', [ReporteController::class, 'exportarPdf'])->name('reportes.pdf');
 
     Route::get('/reportes/excel', [ReporteController::class, 'exportarExcel'])->name('reportes.excel');
+
+    Route::post('/postulantes/importar', [PostulanteController::class, 'importar'])->name('postulantes.importar');
 });
 
 require __DIR__.'/auth.php';

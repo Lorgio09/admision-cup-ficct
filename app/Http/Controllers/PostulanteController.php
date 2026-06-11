@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Postulante;
 use App\Models\Carrera;
 use Illuminate\Http\Request;
+use App\Imports\PostulantesImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PostulanteController extends Controller
 {
@@ -263,5 +265,23 @@ class PostulanteController extends Controller
         ]);
 
         return redirect()->route('postulantes.index')->with('success', '¡Exámenes registrados! Promedio: ' . $promedio . '. Estado: ' . $estado_final);
+    }
+
+    public function importar(Request $request)
+    {
+        // Validamos que sea un archivo real de hojas de cálculo
+        $request->validate([
+            'archivo' => 'required|mimes:xlsx,xls,csv|max:10240', // Máx 10MB
+        ]);
+
+        try {
+            // Ejecutamos la importación masiva en lote
+            Excel::import(new PostulantesImport, $request->file('archivo'));
+    
+            return redirect()->back()->with('status', '✅ Carga masiva completada. Las cuentas de usuario y perfiles académicos han sido creados exitosamente.');
+        } catch (\Exception $e) {
+            // Esto nos va a pintar el error real en la franja roja
+            return redirect()->back()->with('error', '❌ Error real: ' . $e->getMessage());
+        }
     }
 }
