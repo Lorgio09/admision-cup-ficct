@@ -76,6 +76,34 @@
                                 </div>
                             </div>
 
+                            @if(isset($carreras) && $carreras->count() > 0)
+                                <div class="mb-8 bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+                                    <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                                        <span class="text-2xl">🎓</span>
+                                        <h3 class="text-xl font-extrabold text-slate-800">Cupos por Carrera</h3>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr class="text-slate-400 text-[11px] uppercase tracking-widest border-b border-slate-100">
+                                                    <th class="pb-3 font-bold pl-2">Código</th>
+                                                    <th class="pb-3 font-bold">Nombre de la Carrera</th>
+                                                    <th class="pb-3 font-bold text-right pr-2">Cupo Asignado</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-sm text-slate-700">
+                                                @foreach($carreras as $carrera)
+                                                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                                    <td class="py-4 pl-2 font-semibold text-slate-500">{{ $carrera->codigo ?? $carrera->id }}</td>
+                                                    <td class="py-4 font-bold text-slate-800">{{ $carrera->nombre }}</td>
+                                                    <td class="py-4 pr-2 font-black text-indigo-600 text-right">{{ $carrera->pivot ? $carrera->pivot->cupo_maximo : 'Sin asignar' }}</td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            @endif
                             <div class="bg-slate-50/70 rounded-3xl border border-slate-100 p-6 sm:p-8 mb-8">
                                 <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5 border-b border-slate-200/60 pb-3">Acciones de Cierre de Semestre</h4>
                                 

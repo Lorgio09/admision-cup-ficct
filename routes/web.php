@@ -91,8 +91,10 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
         ];
     }
 
+    $carreras = $gestionActiva ? $gestionActiva->carreras : \App\Models\Carrera::all();
+
     // Retorna la vista del administrador con sus indicadores y el asistente de voz listo
-    return view('dashboard', compact('gestionActiva', 'kpisDashboard'));
+    return view('dashboard', compact('gestionActiva', 'kpisDashboard', 'carreras'));
 
 })->middleware(['auth', 'verified'])->name('dashboard');
 // ==========================================
