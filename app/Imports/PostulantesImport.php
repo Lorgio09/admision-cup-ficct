@@ -34,12 +34,12 @@ class PostulantesImport implements ToModel, WithHeadingRow
         $idOpcion2 = null;
 
         if (isset($row['primera_opcion'])) {
-            $carrera1 = \App\Models\Carrera::where('nombre', 'LIKE', '%' . trim($row['primera_opcion']) . '%')->first();
+            $carrera1 = \App\Models\Carrera::where('nombre', 'ILIKE', '%' . trim($row['primera_opcion']) . '%')->first();
             $idOpcion1 = $carrera1 ? $carrera1->id : null;
         }
 
         if (isset($row['segunda_opcion'])) {
-            $carrera2 = \App\Models\Carrera::where('nombre', 'LIKE', '%' . trim($row['segunda_opcion']) . '%')->first();
+            $carrera2 = \App\Models\Carrera::where('nombre', 'ILIKE', '%' . trim($row['segunda_opcion']) . '%')->first();
             $idOpcion2 = $carrera2 ? $carrera2->id : null;
         }
 
