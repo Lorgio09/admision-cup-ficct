@@ -46,7 +46,6 @@ class DocenteController extends Controller
             'ci' => $request->ci,
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
-            'correo' => $request->correo,
             'user_id' => $user->id,
             'materia_id' => $request->materia_id
         ]);
