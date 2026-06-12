@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
     'direccion', 
     'carrera_primera_opcion_id', 
     'carrera_segunda_opcion_id', 
+    'grupo_id',
     'recibo_pago', 
     'certificado_bachiller', 
     'estado', 

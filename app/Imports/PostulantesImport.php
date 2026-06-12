@@ -29,6 +29,7 @@ class PostulantesImport implements ToModel, WithHeadingRow
             return null;
         }
 
+        // 1. Búsqueda de Carreras
         $idOpcion1 = null;
         $idOpcion2 = null;
 
@@ -42,11 +43,30 @@ class PostulantesImport implements ToModel, WithHeadingRow
             $idOpcion2 = $carrera2 ? $carrera2->id : null;
         }
 
-        // Extracciones blindadas con valores por defecto
+        // 2. Búsqueda del Grupo (Modo Blindado para PostgreSQL)
+        $idGrupo = null;
+        
+        // Verificamos que la celda exista y no esté vacía
+        if (isset($row['grupo']) && !empty(trim($row['grupo'])) && $this->gestionActiva) {
+            
+            // Usamos ILIKE y comodines % por si el Excel trae espacios fantasmas
+            $grupoBuscado = trim($row['grupo']);
+            
+            $grupo = \App\Models\Grupo::where('nombre', 'ILIKE', '%' . $grupoBuscado . '%')
+                                      ->where('gestion_id', $this->gestionActiva->id)
+                                      ->first();
+                                      
+            $idGrupo = $grupo ? $grupo->id : null;
+            
+            // TRUCO DE DEBUG: Descomenta la siguiente línea si quieres ver qué está leyendo el sistema
+            //dd("Excel dice: " . $grupoBuscado, "ID encontrado: " . $idGrupo);
+        }
+        // 3. Extracciones blindadas
         $sexoExtraido = isset($row['sexo']) ? substr(strtoupper(trim($row['sexo'])), 0, 1) : 'O';
         $telefonoExtraido = isset($row['telefono']) ? trim($row['telefono']) : 'S/N';
         $direccionExtraida = isset($row['direccion']) ? trim($row['direccion']) : 'Sin especificar';
 
+        // 4. Crear Usuario
         $user = User::firstOrCreate(
             ['email' => trim($row['correo'])],
             [
@@ -56,6 +76,7 @@ class PostulantesImport implements ToModel, WithHeadingRow
             ]
         );
 
+        // 5. Crear Postulante asignando el grupo_id
         Postulante::updateOrCreate(
             ['ci' => trim($row['ci'])],
             [
@@ -64,9 +85,10 @@ class PostulantesImport implements ToModel, WithHeadingRow
                 'correo'    => trim($row['correo']),
                 'sexo'      => $sexoExtraido,
                 'telefono'  => $telefonoExtraido,
-                'direccion' => $direccionExtraida, // Inyectamos la dirección
+                'direccion' => $direccionExtraida,
                 'carrera_primera_opcion_id' => $idOpcion1,
                 'carrera_segunda_opcion_id' => $idOpcion2,
+                'grupo_id'  => $idGrupo, // Asignación directa del grupo
                 'estado'    => 'inscrito'
             ]
         );
