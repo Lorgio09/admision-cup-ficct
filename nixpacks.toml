@@ -1,4 +1,0 @@
-[phases.setup]
-cmds = [
-    "install-php-extensions gd zip ctype curl dom fileinfo filter hash mbstring openssl pcre pdo session tokenizer xml pdo_pgsql"
-]
