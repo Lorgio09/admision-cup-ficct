@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         // 2. Llamamos al seeder de las carreras
         $this->call([
             CarreraSeeder::class,
+            MateriaSeeder::class,
         ]); 
     }
 }
