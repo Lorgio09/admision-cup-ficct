@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('ci')->unique();
             $table->string('nombre');
             $table->string('telefono');
+            $table->string('profesion');
             $table->timestamps();
 
             $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');

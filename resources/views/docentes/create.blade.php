@@ -41,6 +41,19 @@
                        </select>
                     </div>
 
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Profesión / Título del Docente</label>
+                        <select name="profesion" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                            <option value="">-- Seleccione el título --</option>
+                            <option value="Ingeniero en Sistemas">Ingeniero en Sistemas</option>
+                            <option value="Ingeniero Informático">Ingeniero Informático</option>
+                            <option value="Licenciado en Física">Licenciado en Física</option>
+                            <option value="Licenciado en Matemáticas">Licenciado en Matemáticas</option>
+                            <option value="Licenciado en Idiomas">Licenciado en Idiomas</option>
+                            <option value="Abogado">Abogado</option>
+                        </select>
+                    </div>
+
                     <div class="mt-4">
                         <label for="correo" class="block font-medium text-sm text-gray-700">Correo Electrónico (Para iniciar sesión)</label>
                         <input type="email" name="correo" id="correo" class="border-gray-300 focus:border-indigo-500 rounded-md shadow-sm w-full mt-1" value="{{ old('correo') }}" required>

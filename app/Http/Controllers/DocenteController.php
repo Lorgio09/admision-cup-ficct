@@ -25,15 +25,35 @@ class DocenteController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validación básica de los campos que llegan del formulario
         $request->validate([
             'ci' => 'required|string|max:15|unique:docentes',
             'nombre' => 'required|string|max:255',
             'telefono' => 'required|string|max:20',
             'correo' => 'required|email|unique:users,email', // El correo va a la tabla de usuarios
+            'profesion' => 'required|string|max:255', // 👈 Añadimos la validación de la profesión
             'materia_id' => 'required|exists:materias,id'
         ]);
 
-        // 1. Creamos la cuenta de usuario para que el docente pueda iniciar sesión
+        // 2. Buscamos la materia exacta que el administrador seleccionó
+        $materia = \App\Models\Materia::findOrFail($request->materia_id);
+
+        // 3. MATRIZ DE COMPATIBILIDAD (Regla de Negocio)
+        // Definimos qué perfiles están autorizados para cada materia usando el código de la materia
+        $perfilesPermitidos = [
+            'COMP' => ['Ingeniero en Sistemas', 'Ingeniero Informático'],
+            'FIS'  => ['Licenciado en Física', 'Ingeniero en Sistemas'],
+            'MAT'  => ['Licenciado en Matemáticas', 'Ingeniero Informático', 'Ingeniero en Sistemas'],
+            'ING'  => ['Licenciado en Idiomas']
+        ];
+
+        // 4. Verificamos si la profesión del docente NO está en la lista de permitidos
+        if (!in_array($request->profesion, $perfilesPermitidos[$materia->codigo])) {
+            return back()->with('error', 'VALIDACIÓN RECHAZADA: Un "' . $request->profesion . '" no tiene el perfil académico autorizado para dictar la materia de ' . $materia->nombre . '.')
+                         ->withInput(); // Mantiene lo que el usuario ya había escrito
+        }
+
+        // 5. Si pasó la validación, creamos la cuenta de usuario para que inicie sesión
         $user = User::create([
             'name' => $request->nombre,
             'email' => $request->correo,
@@ -41,11 +61,12 @@ class DocenteController extends Controller
             'rol' => 'docente' // Asignamos el rol
         ]);
 
-        // 2. Registramos los datos específicos del docente y lo unimos al usuario
+        // 6. Registramos los datos específicos del docente y lo unimos al usuario
         Docente::create([
             'ci' => $request->ci,
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
+            'profesion' => $request->profesion, 
             'user_id' => $user->id,
             'materia_id' => $request->materia_id
         ]);
