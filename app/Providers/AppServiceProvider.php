@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // 2. AÑADIMOS ESTA CONDICIÓN PARA PRODUCCIÓN
-        if (env('APP_ENV') === 'production') {
+        if (str_contains(request()->getHost(), 'railway.app')) {
             URL::forceScheme('https');
         }
     }
