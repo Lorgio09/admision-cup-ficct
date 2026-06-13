@@ -1,0 +1,126 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Grupo;
+use App\Models\Postulante;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\Gestion;
+use App\Models\Docente;
+use App\Models\Materia;
+use App\Models\Aula;
+
+class GrupoController extends Controller
+{
+    // 1. MOSTRAR EL PANEL
+    public function index()
+    {
+        $gestionActiva = Gestion::where('is_active', true)->first();
+
+        if (!$gestionActiva) {
+            return redirect()->route('dashboard')->with('error', 'Debe aperturar un semestre primero.');
+        }
+
+        // 1. Cargamos los grupos con sus aulas y sus asignaciones (eager loading)
+        $grupos = Grupo::with(['aula', 'asignaciones.docente', 'asignaciones.materia'])
+            ->withCount('postulantes')
+            ->where('gestion_id', $gestionActiva->id)
+            ->get();
+
+        // 2. Cargamos docentes y materias para los selectores internos
+        $docentes = Docente::all();
+        $materias = Materia::all();
+        $aulas = Aula::all();
+
+        // ... Conserva aquí tus variables de estadísticas (Total alumnos inscritos, etc.) ...
+        $totalInscritos = \App\Models\Postulante::whereNotNull('grupo_id')->count(); // Ejemplo
+        $pendientesDeAsignar = \App\Models\Postulante::whereNull('grupo_id')->count();
+
+        return view('grupos.index', compact('grupos', 'docentes', 'materias', 'aulas', 'totalInscritos', 'pendientesDeAsignar', 'gestionActiva'));
+    }
+
+    // 2. CREAR GRUPO MANUALMENTE (NUEVO)
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'turno' => 'required|in:Mañana,Tarde,Noche',
+            'aula_id' => 'nullable|exists:aulas,id'
+        ]);
+
+        $hora_inicio = ($request->turno === 'Mañana') ? '07:00:00' : '14:00:00';
+        $hora_fin    = ($request->turno === 'Mañana') ? '13:00:00' : '20:00:00';
+        $gestionActiva = Gestion::where('is_active', true)->first();
+
+        Grupo::create([
+            'nombre' => $request->nombre,
+            'turno' => $request->turno,
+            'aula_id' => $request->aula_id,
+            'hora_inicio' => $hora_inicio,
+            'hora_fin' => $hora_fin,
+            'gestion_id' => $gestionActiva->id
+        ]);
+
+        return back()->with('status', 'Grupo creado exitosamente con sus horarios asignados.');
+    }
+
+    // 3. LLENAR LOS GRUPOS EXISTENTES (INTELIGENTE)
+    public function generar()
+    {
+        $alumnosSinGrupo = Postulante::where('estado', 'inscrito')->whereNull('grupo_id')->get();
+
+        if ($alumnosSinGrupo->isEmpty()) {
+            return back()->with('error', 'No hay alumnos pendientes para asignar.');
+        }
+
+        // Buscamos los grupos que tú creaste y que tengan MENOS de 70 alumnos
+        $gruposConEspacio = Grupo::withCount('postulantes')
+                                 ->having('postulantes_count', '<', 70)
+                                 ->get();
+
+        if ($gruposConEspacio->isEmpty()) {
+            return back()->with('error', 'No hay grupos con espacio disponible. Por favor, crea un nuevo grupo manualmente primero.');
+        }
+
+        $alumnosAsignados = 0;
+
+        foreach ($gruposConEspacio as $grupo) {
+            // Calculamos cuántas sillas vacías quedan en este grupo
+            $espacioDisponible = 70 - $grupo->postulantes_count;
+            
+            // Cortamos de la lista principal solo la cantidad de alumnos que caben aquí
+            $alumnosParaEsteGrupo = $alumnosSinGrupo->splice(0, $espacioDisponible);
+            
+            foreach ($alumnosParaEsteGrupo as $alumno) {
+                $alumno->update(['grupo_id' => $grupo->id]);
+                $alumnosAsignados++;
+            }
+
+            // Si ya no quedan alumnos en la lista de espera, detenemos el proceso
+            if ($alumnosSinGrupo->isEmpty()) {
+                break;
+            }
+        }
+
+        // Si se llenaron los grupos pero aún quedaron alumnos sin asignar:
+        if ($alumnosSinGrupo->isNotEmpty()) {
+            return back()->with('success', "Se asignaron $alumnosAsignados alumnos, pero faltó espacio para " . $alumnosSinGrupo->count() . " postulantes. Por favor, crea más grupos.");
+        }
+
+        return back()->with('success', "¡Se asignaron los $alumnosAsignados alumnos a tus grupos de forma exitosa!");
+    }
+
+    // 4. ELIMINAR GRUPO
+    public function destroy(Grupo $grupo)
+    {
+        // Guardamos el nombre para el mensaje
+        $nombreGrupo = $grupo->nombre;
+        
+        // Eliminamos el grupo físico. 
+        // Gracias a tu migración, los alumnos no se borran, solo vuelven a quedar "pendientes"
+        $grupo->delete();
+
+        return back()->with('success', "El $nombreGrupo fue eliminado. Sus estudiantes ahora están pendientes de asignación.");
+    }
+}
