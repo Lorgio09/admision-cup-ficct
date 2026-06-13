@@ -27,10 +27,10 @@
                     </form>
                 </div>                
                 <div class="flex gap-2">
-                    <a href="{{ route('reportes.pdf', ['gestion_id' => $gestionActiva->id ?? '']) }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow text-sm flex items-center gap-2 transition">
+                    <a href="{{ route('reportes.pdf', ['gestion_id' => $gestionActiva->id ?? '']) }}" target="_blank" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow text-sm flex items-center gap-2 transition">
                         📄 Exportar Acta PDF
                     </a>
-                    <a href="{{ route('reportes.excel', ['gestion_id' => $gestionActiva->id ?? '']) }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow text-sm flex items-center gap-2 transition">
+                    <a href="{{ route('reportes.excel', ['gestion_id' => $gestionActiva->id ?? '']) }}" target="_blank" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow text-sm flex items-center gap-2 transition">
                         📊 Exportar Excel
                     </a>
                 </div>

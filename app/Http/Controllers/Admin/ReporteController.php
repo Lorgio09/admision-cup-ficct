@@ -138,8 +138,6 @@ public function exportarPdf(Request $request)
         // Formato vertical (A4)
         $pdf->setPaper('A4', 'portrait');
 
-        ob_end_clean();
-
         // Retornamos el archivo para su descarga
         return $pdf->download('Acta_Resultados_'.$gestionSeleccionada->nombre.'.pdf');
     }
@@ -159,8 +157,6 @@ public function exportarPdf(Request $request)
 
         // 2. Ejecutamos la descarga del archivo .xlsx de forma nativa
         $nombreArchivo = 'Reporte_Postulantes_' . $gestionSeleccionada->nombre . '.xlsx';
-        
-        ob_end_clean();
 
         return Excel::download(new PostulantesExport($gestionSeleccionada->id), $nombreArchivo);
     }
