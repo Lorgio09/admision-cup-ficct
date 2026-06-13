@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CredencialesDocenteMail;
 use App\Models\Materia;
 use App\Models\Docente;
 use App\Models\User;
@@ -30,8 +32,8 @@ class DocenteController extends Controller
             'ci' => 'required|string|max:15|unique:docentes',
             'nombre' => 'required|string|max:255',
             'telefono' => 'required|string|max:20',
-            'correo' => 'required|email|unique:users,email', // El correo va a la tabla de usuarios
-            'profesion' => 'required|string|max:255', // 👈 Añadimos la validación de la profesión
+            'correo' => 'required|email|unique:users,email', 
+            'profesion' => 'required|string|max:255', 
             'materia_id' => 'required|exists:materias,id'
         ]);
 
@@ -39,7 +41,6 @@ class DocenteController extends Controller
         $materia = \App\Models\Materia::findOrFail($request->materia_id);
 
         // 3. MATRIZ DE COMPATIBILIDAD (Regla de Negocio)
-        // Definimos qué perfiles están autorizados para cada materia usando el código de la materia
         $perfilesPermitidos = [
             'COMP' => ['Ingeniero en Sistemas', 'Ingeniero Informático'],
             'FIS'  => ['Licenciado en Física', 'Ingeniero en Sistemas'],
@@ -50,7 +51,7 @@ class DocenteController extends Controller
         // 4. Verificamos si la profesión del docente NO está en la lista de permitidos
         if (!in_array($request->profesion, $perfilesPermitidos[$materia->codigo])) {
             return back()->with('error', 'VALIDACIÓN RECHAZADA: Un "' . $request->profesion . '" no tiene el perfil académico autorizado para dictar la materia de ' . $materia->nombre . '.')
-                         ->withInput(); // Mantiene lo que el usuario ya había escrito
+                         ->withInput(); 
         }
 
         // 5. Si pasó la validación, creamos la cuenta de usuario para que inicie sesión
@@ -58,11 +59,11 @@ class DocenteController extends Controller
             'name' => $request->nombre,
             'email' => $request->correo,
             'password' => Hash::make('12345678'), // Contraseña por defecto
-            'rol' => 'docente' // Asignamos el rol
+            'rol' => 'docente' 
         ]);
 
-        // 6. Registramos los datos específicos del docente y lo unimos al usuario
-        Docente::create([
+        // 6. Registramos al docente y ATRAPAMOS el resultado en la variable $docente
+        $docente = Docente::create([
             'ci' => $request->ci,
             'nombre' => $request->nombre,
             'telefono' => $request->telefono,
@@ -71,7 +72,10 @@ class DocenteController extends Controller
             'materia_id' => $request->materia_id
         ]);
 
-        return redirect()->route('docentes.index')->with('success', 'Docente registrado y cuenta de acceso creada.');
+        // 7. NOTIFICACIÓN TRANSACCIONAL: Disparamos el correo con las credenciales
+        Mail::to($user->email)->send(new CredencialesDocenteMail($docente, '12345678'));
+
+        return redirect()->route('docentes.index')->with('success', 'Docente registrado, cuenta creada y credenciales enviadas por correo.');
     }
 
     public function edit(Docente $docente)
